@@ -21,15 +21,12 @@ namespace ExchangeRate.WebService
         .ValidateOnStart();
 
       // Add services to the container.
-      builder.Services.AddSingleton<IValidateOptions<ExchangeRatesOptions>, ExchangeRatesOptionsValidator>();
-      builder.Services.AddScoped<IExchangeRateProvider, NbpProvider>();
-      builder.Services.AddScoped<IExchangeRateProvider, FrankfurterProvider>();
-      builder.Services.AddScoped<IProviderResolver, ProviderResolver>();
+      builder.Services.AddExchangeRateServices();
+      builder.Services.AddProviderHttpClients(builder.Configuration);
 
       builder.Services.AddControllers();
       builder.Services.AddEndpointsApiExplorer();
       builder.Services.AddSwaggerGen();
-      builder.Services.AddProviderHttpClients(builder.Configuration);
 
 
       var app = builder.Build();
