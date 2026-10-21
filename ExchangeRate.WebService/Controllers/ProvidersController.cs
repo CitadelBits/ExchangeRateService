@@ -39,5 +39,17 @@ namespace CurrencyAggregator.Service.Controllers
 
       return Task.FromResult<IActionResult>(Ok(response));
     }
+
+    [HttpGet()]
+    [Route("{provider}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public Task<IActionResult> GetCurrencies(string provider)
+    {
+
+
+
+      return Task.FromResult<IActionResult>(Ok());
+    }
+
   }
 }

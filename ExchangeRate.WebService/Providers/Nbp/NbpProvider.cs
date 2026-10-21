@@ -2,7 +2,7 @@
 using ExchangeRate.WebService.Options;
 using Microsoft.Extensions.Options;
 
-namespace ExchangeRate.WebService.Providers
+namespace ExchangeRate.WebService.Providers.Nbp
 {
   public class NbpProvider : IExchangeRateProvider
   {
