@@ -1,12 +1,22 @@
 ﻿using ExchangeRate.WebService.Models;
+using ExchangeRate.WebService.Options;
+using Microsoft.Extensions.Options;
 
 namespace ExchangeRate.WebService.Providers
 {
   public class FrankfurterProvider : IExchangeRateProvider
   {
-    public string Code => throw new NotImplementedException();
+    private readonly ProviderOptions _options;
 
-    public string DisplayName => throw new NotImplementedException();
+    public string Code => Consts.ProviderCodes.Frankfurter;
+    public string DisplayName => _options.DisplayName;
+    public FrankfurterProvider(IOptions<ExchangeRatesOptions> options)
+    {
+      _options = options.Value.Providers
+          .FirstOrDefault(p => p.Code == Code)
+          ?? throw new InvalidOperationException(
+              $"Missing configuration for provider '{Code}'.");
+    }
 
     public Task<IReadOnlyList<Currency>> GetCurrenciesAsync(CancellationToken cancellationToken)
     {

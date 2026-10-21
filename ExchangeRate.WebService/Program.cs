@@ -1,6 +1,7 @@
 
 using ExchangeRate.WebService.Configuration;
 using ExchangeRate.WebService.Options;
+using ExchangeRate.WebService.Providers;
 using Microsoft.Extensions.Options;
 
 namespace ExchangeRate.WebService
@@ -17,6 +18,9 @@ namespace ExchangeRate.WebService
 
       // Add services to the container.
       builder.Services.AddSingleton<IValidateOptions<ExchangeRatesOptions>, ExchangeRatesOptionsValidator>();
+      builder.Services.AddScoped<IExchangeRateProvider, NbpProvider>();
+      builder.Services.AddScoped<IExchangeRateProvider, FrankfurterProvider>();
+      builder.Services.AddScoped<IProviderResolver, ProviderResolver>();
 
       builder.Services.AddControllers();
       builder.Services.AddEndpointsApiExplorer();
