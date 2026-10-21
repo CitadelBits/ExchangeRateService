@@ -1,5 +1,7 @@
 
 using ExchangeRate.WebService.Configuration;
+using ExchangeRate.WebService.Consts;
+using ExchangeRate.WebService.Extensions;
 using ExchangeRate.WebService.Options;
 using ExchangeRate.WebService.Providers;
 using ExchangeRate.WebService.Providers.Frankfurter;
@@ -15,7 +17,7 @@ namespace ExchangeRate.WebService
       var builder = WebApplication.CreateBuilder(args);
 
       builder.Services.AddOptions<ExchangeRatesOptions>()
-        .Bind(builder.Configuration.GetSection("ExchangeRates"))
+        .Bind(builder.Configuration.GetSection(ConfigurationSections.ExchangeRates))
         .ValidateOnStart();
 
       // Add services to the container.
@@ -27,6 +29,8 @@ namespace ExchangeRate.WebService
       builder.Services.AddControllers();
       builder.Services.AddEndpointsApiExplorer();
       builder.Services.AddSwaggerGen();
+      builder.Services.AddProviderHttpClients(builder.Configuration);
+
 
       var app = builder.Build();
 
