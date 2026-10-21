@@ -4,6 +4,7 @@ using ExchangeRate.WebService.Providers;
 using ExchangeRate.WebService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.ComponentModel;
 
 namespace CurrencyAggregator.Service.Controllers
 {
@@ -28,6 +29,10 @@ namespace CurrencyAggregator.Service.Controllers
       _exchangeRateService = exchangeRateService;
     }
 
+
+    /// <summary>
+    /// Get all available providers and the default provider.
+    /// </summary>
     [HttpGet()]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public Task<IActionResult> GetProviders()
@@ -43,11 +48,25 @@ namespace CurrencyAggregator.Service.Controllers
       return Task.FromResult<IActionResult>(Ok(response));
     }
 
+
+    /// <summary>
+    /// Get currencies from the specified provider.
+    /// </summary>
+    /// <param name="provider">Provider code, e.g. nbp or frankfurter</param>
     [HttpGet()]
     [Route("{provider}/currencies")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCurrencies(string provider, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetCurrencies(string provider, 
+      CancellationToken cancellationToken)
     {
+      var resolvedProvider = _providerResolver.GetAll()
+          .FirstOrDefault(p => p.Code.Equals(provider, StringComparison.OrdinalIgnoreCase));
+      if (resolvedProvider is null)
+      {
+        return BadRequest($"Unsupported provider: {provider}");
+      }
+
       var currencies = await _exchangeRateService.GetCurrenciesAsync(
           provider,
           cancellationToken);
