@@ -10,10 +10,8 @@ namespace ExchangeRate.WebService.Services
     public ExchangeRateService(IProviderResolver providerResolver) 
     { 
       _providerResolver = providerResolver;
-      
     }
     
-
     public async Task<IReadOnlyList<Currency>> GetCurrenciesAsync(string providerCode, CancellationToken cancellationToken)
     {
       var provider = _providerResolver.Resolve(providerCode);
@@ -22,7 +20,8 @@ namespace ExchangeRate.WebService.Services
 
     public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string providerCode, string fromCurrency, string toCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
     {
-      throw new NotImplementedException();
+      var provider = _providerResolver.Resolve(providerCode);
+      return await provider.GetRatesAsync(fromCurrency, toCurrency, from, to, cancellationToken);
     }
   }
 }

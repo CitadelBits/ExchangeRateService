@@ -8,14 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Dtos\ExchangeRatesQueryDto.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Dtos\ExchangeRatesQueryDto.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 

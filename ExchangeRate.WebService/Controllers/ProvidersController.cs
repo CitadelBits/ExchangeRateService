@@ -4,7 +4,6 @@ using ExchangeRate.WebService.Providers;
 using ExchangeRate.WebService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.ComponentModel;
 
 namespace CurrencyAggregator.Service.Controllers
 {
@@ -78,6 +77,45 @@ namespace CurrencyAggregator.Service.Controllers
 
       return Ok(result);
     }
+
+    /// <summary>
+    /// Get rates from the specified provider.
+    /// </summary>
+    /// <param name="provider">Provider code, e.g. nbp or frankfurter</param>
+    /// <param name="query">Exchange rates query parameters</param>
+    [HttpGet()]
+    [Route("{provider}/rates")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetRates(
+        string provider,
+        [FromQuery] ExchangeRatesQueryDto query,
+        CancellationToken cancellationToken)
+    {
+      var resolvedProvider = _providerResolver.GetAll()
+          .FirstOrDefault(p => p.Code.Equals(provider, StringComparison.OrdinalIgnoreCase));
+      if (resolvedProvider is null)
+      {
+        return BadRequest($"Unsupported provider: {provider}");
+      }
+
+
+      var rates = await _exchangeRateService.GetRatesAsync(
+          provider,
+          query.FromCurrency,
+          query.ToCurrency,
+          query.From ?? DateOnly.FromDateTime(DateTime.Now),
+          query.To ?? DateOnly.FromDateTime(DateTime.Now),
+          cancellationToken);
+
+      var result = rates
+          .Select(r => new DailyRateDto(r.Date, r.Value))
+          .OrderBy(r => r.Date)
+          .ToList();
+
+      return Ok(result);
+    }
+
 
   }
 }

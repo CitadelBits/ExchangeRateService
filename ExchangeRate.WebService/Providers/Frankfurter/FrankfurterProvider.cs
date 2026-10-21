@@ -42,9 +42,36 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
           .ToList();
     }
 
-    public Task<IReadOnlyList<DailyRate>> GetRatesAsync(string baseCurrency, string targetCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(
+        string fromCurrency,
+        string toCurrency,
+        DateOnly from,
+        DateOnly to,
+        CancellationToken ct)
     {
-      throw new NotImplementedException();
+      var url =
+          $"v2/rates?base={fromCurrency}" +
+          $"&quotes={toCurrency}" +
+          $"&from={from:yyyy-MM-dd}" +
+          $"&to={to:yyyy-MM-dd}";
+
+      var response = await _httpClient
+          .GetFromJsonAsync<List<FrankfurterRateResponse>>(url, ct);
+
+      if (response is null)
+      {
+        throw new InvalidOperationException(
+            "Frankfurter returned an empty response.");
+      }
+
+      return response
+          .Select(r => new DailyRate(
+              r.Date,
+              r.BaseCurrency,
+              r.TargetCurrency,
+              r.Rate))
+          .OrderBy(r => r.Date)
+          .ToList();
     }
   }
 }
