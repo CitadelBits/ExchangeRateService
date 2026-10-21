@@ -1,6 +1,7 @@
 using ExchangeRate.WebService.Dtos;
 using ExchangeRate.WebService.Options;
 using ExchangeRate.WebService.Providers;
+using ExchangeRate.WebService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -13,16 +14,18 @@ namespace CurrencyAggregator.Service.Controllers
     private readonly ILogger<ProvidersController> _logger;
     private IProviderResolver _providerResolver;
     private readonly IOptions<ExchangeRatesOptions> _options;
-
+    private readonly IExchangeRateService _exchangeRateService;
 
     public ProvidersController(ILogger<ProvidersController> logger, 
       IProviderResolver providerResolver, 
-      IOptions<ExchangeRatesOptions> options
+      IOptions<ExchangeRatesOptions> options,
+      IExchangeRateService exchangeRateService
       )
     {
       _logger = logger;
       _providerResolver = providerResolver;
       _options = options;
+      _exchangeRateService = exchangeRateService;
     }
 
     [HttpGet()]
@@ -41,14 +44,20 @@ namespace CurrencyAggregator.Service.Controllers
     }
 
     [HttpGet()]
-    [Route("{provider}")]
+    [Route("{provider}/currencies")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public Task<IActionResult> GetCurrencies(string provider)
+    public async Task<IActionResult> GetCurrencies(string provider, CancellationToken cancellationToken)
     {
+      var currencies = await _exchangeRateService.GetCurrenciesAsync(
+          provider,
+          cancellationToken);
 
+      var result = currencies
+          .Select(c => new CurrencyDto(c.Code, c.Name))
+          .OrderBy(c => c.Code)
+          .ToList();
 
-
-      return Task.FromResult<IActionResult>(Ok());
+      return Ok(result);
     }
 
   }
