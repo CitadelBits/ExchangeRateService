@@ -1,4 +1,6 @@
-﻿namespace ExchangeRate.WebService.Providers
+﻿using ExchangeRate.WebService.Exceptions;
+
+namespace ExchangeRate.WebService.Providers
 {
   public class ProviderResolver : IProviderResolver
   {
@@ -19,9 +21,7 @@
       if (_providers.TryGetValue(providerCode, out var provider))
         return provider;
 
-      throw new ArgumentException(
-          $"Unknown provider: {providerCode}",
-          nameof(providerCode));
+      throw new UnknownProviderException(providerCode);
     }
 
     public IReadOnlyList<IExchangeRateProvider> GetAll()

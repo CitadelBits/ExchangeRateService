@@ -60,13 +60,6 @@ namespace CurrencyAggregator.Service.Controllers
     public async Task<IActionResult> GetCurrencies(string provider, 
       CancellationToken cancellationToken)
     {
-      var resolvedProvider = _providerResolver.GetAll()
-          .FirstOrDefault(p => p.Code.Equals(provider, StringComparison.OrdinalIgnoreCase));
-      if (resolvedProvider is null)
-      {
-        return BadRequest($"Unsupported provider: {provider}");
-      }
-
       var currencies = await _exchangeRateService.GetCurrenciesAsync(
           provider,
           cancellationToken);
@@ -92,14 +85,6 @@ namespace CurrencyAggregator.Service.Controllers
         [FromQuery] ExchangeRatesQueryDto query,
         CancellationToken cancellationToken)
     {
-      var resolvedProvider = _providerResolver.GetAll()
-          .FirstOrDefault(p => p.Code.Equals(provider, StringComparison.OrdinalIgnoreCase));
-      if (resolvedProvider is null)
-      {
-        return BadRequest($"Unsupported provider: {provider}");
-      }
-
-
       var rates = await _exchangeRateService.GetRatesAsync(
           provider,
           query.FromCurrency,
@@ -119,7 +104,6 @@ namespace CurrencyAggregator.Service.Controllers
 
       return Ok(result);
     }
-
 
   }
 }

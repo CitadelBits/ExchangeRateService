@@ -25,6 +25,9 @@ namespace ExchangeRate.WebService
       builder.Services.AddExchangeRateServices();
       builder.Services.AddProviderHttpClients(builder.Configuration);
 
+      builder.Services.AddProblemDetails();
+      builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
       builder.Services.AddControllers();
       builder.Services.AddEndpointsApiExplorer();
       builder.Services.AddSwaggerGen(c =>
@@ -48,6 +51,7 @@ namespace ExchangeRate.WebService
 
       app.UseAuthorization();
 
+      app.UseExceptionHandler();
 
       app.MapControllers();
 
