@@ -12,8 +12,8 @@ namespace ExchangeRate.WebService.Services
         string providerCode,
         string fromCurrency,
         string toCurrency,
-        DateOnly from,
-        DateOnly to,
+        DateOnly? from,
+        DateOnly? to,
         CancellationToken cancellationToken);
   }
 }

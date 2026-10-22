@@ -50,13 +50,6 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
         DateOnly to,
         CancellationToken ct)
     {
-      if (from > to)
-      {
-        throw new ArgumentException(
-            "Start date cannot be later than end date.");
-      }
-
-
       var url = _options.Endpoints.Rates
           .Replace("{fromCurrency}", fromCurrency)
           .Replace("{toCurrency}", toCurrency)

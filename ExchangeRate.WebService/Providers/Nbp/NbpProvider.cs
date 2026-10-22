@@ -43,15 +43,9 @@ namespace ExchangeRate.WebService.Providers.Nbp
 
     public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string fromCurrency, string toCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
     {
-      if (from > to)
-      {
-        throw new ArgumentException(
-            "Start date cannot be later than end date.");
-      }
-
       var url = _options.Endpoints.Rates
-    .Replace("{fromDate}", from.ToString("yyyy-MM-dd"))
-    .Replace("{toDate}", to.ToString("yyyy-MM-dd"));
+      .Replace("{fromDate}", from.ToString("yyyy-MM-dd"))
+      .Replace("{toDate}", to.ToString("yyyy-MM-dd"));
 
       var response = await _httpClient
     .GetAsync(url, cancellationToken);

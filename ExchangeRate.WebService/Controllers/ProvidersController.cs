@@ -72,7 +72,6 @@ namespace CurrencyAggregator.Service.Controllers
 
       var result = currencies
           .Select(c => new CurrencyDto(c.Code, c.Name))
-          .OrderBy(c => c.Code)
           .ToList();
 
       return Ok(result);
@@ -104,13 +103,12 @@ namespace CurrencyAggregator.Service.Controllers
           provider,
           query.FromCurrency,
           query.ToCurrency,
-          query.From ?? DateOnly.FromDateTime(DateTime.Now),
-          query.To ?? DateOnly.FromDateTime(DateTime.Now),
+          query.From,
+          query.To,
           cancellationToken);
 
       var result = rates
           .Select(r => new DailyRateDto(r.Date, r.Value))
-          .OrderBy(r => r.Date)
           .ToList();
 
       return Ok(result);
