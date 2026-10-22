@@ -24,6 +24,11 @@ public sealed class CustomExceptionHandler : IExceptionHandler
               "Provider Not Found",
               ex.Message),
 
+      EmptyResponseException ex =>
+          (StatusCodes.Status204NoContent,
+              "Invalid Arguments",
+              ex.Message),
+
       ArgumentException ex =>
           (StatusCodes.Status400BadRequest,
               "Invalid Arguments",

@@ -1,4 +1,5 @@
 using ExchangeRate.WebService.Dtos;
+using ExchangeRate.WebService.Models;
 using ExchangeRate.WebService.Options;
 using ExchangeRate.WebService.Providers;
 using ExchangeRate.WebService.Services;
@@ -103,6 +104,27 @@ namespace CurrencyAggregator.Service.Controllers
           ).ToList();
 
       return Ok(result);
+    }
+
+    /// <summary>
+    /// Get statistics from the specified provider.
+    /// </summary>
+    [HttpGet()]
+    [Route("{provider}/statistics")]
+    public async Task<ActionResult<ExchangeRateStatistics>> GetStatistics(
+        string provider,
+        [FromQuery] ExchangeRatesQueryDto query,
+        CancellationToken cancellationToken)
+    {
+      var statistics = await _exchangeRateService.GetStatisticsAsync(
+          provider,
+          query.FromCurrency,
+          query.ToCurrency,
+          query.From,
+          query.To,
+          cancellationToken);
+
+      return Ok(statistics);
     }
 
   }

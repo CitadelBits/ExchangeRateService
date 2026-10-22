@@ -15,5 +15,13 @@ namespace ExchangeRate.WebService.Services
         DateOnly? from,
         DateOnly? to,
         CancellationToken cancellationToken);
+
+    Task<ExchangeRateStatistics> GetStatisticsAsync(
+        string providerCode,
+        string fromCurrency,
+        string toCurrency,
+        DateOnly? from,
+        DateOnly? to,
+        CancellationToken cancellationToken);
   }
 }

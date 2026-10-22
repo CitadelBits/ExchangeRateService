@@ -1,4 +1,5 @@
-﻿using ExchangeRate.WebService.Models;
+﻿using ExchangeRate.WebService.Exceptions;
+using ExchangeRate.WebService.Models;
 using ExchangeRate.WebService.Options;
 using ExchangeRate.WebService.Providers.Frankfurter.Responses;
 using ExchangeRate.WebService.Providers.Nbp.Responses;
@@ -43,21 +44,22 @@ namespace ExchangeRate.WebService.Providers.Nbp
 
     public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string fromCurrency, string toCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
     {
-      var url = _options.Endpoints.Rates
-      .Replace("{fromDate}", from.ToString("yyyy-MM-dd"))
-      .Replace("{toDate}", to.ToString("yyyy-MM-dd"));
+    var url = _options.Endpoints.Rates
+    .Replace("{fromDate}", from.ToString("yyyy-MM-dd"))
+    .Replace("{toDate}", to.ToString("yyyy-MM-dd"));
 
       var response = await _httpClient
     .GetAsync(url, cancellationToken);
 
-      response.EnsureSuccessStatusCode();
-      var responseJson = await response.Content.ReadFromJsonAsync<List<NbpTableResponse>>();
-
-      if (responseJson is null)
+      if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
       {
-        throw new InvalidOperationException(
+        throw new EmptyResponseException(
             "NBP returned an empty response.");
       }
+
+      response.EnsureSuccessStatusCode();
+
+      var responseJson = await response.Content.ReadFromJsonAsync<List<NbpTableResponse>>();
 
       var allNbpExchangeRatesDictionary = responseJson.SelectMany
       (

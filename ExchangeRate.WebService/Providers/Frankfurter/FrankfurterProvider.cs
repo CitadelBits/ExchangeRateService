@@ -1,4 +1,5 @@
-﻿using ExchangeRate.WebService.Models;
+﻿using ExchangeRate.WebService.Exceptions;
+using ExchangeRate.WebService.Models;
 using ExchangeRate.WebService.Options;
 using ExchangeRate.WebService.Providers.Frankfurter.Responses;
 using Microsoft.Extensions.Options;
@@ -32,7 +33,7 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
 
       if (response is null)
       {
-        throw new InvalidOperationException(
+        throw new EmptyResponseException(
             "Frankfurter API returned an empty response.");
       }
 
@@ -61,7 +62,7 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
 
       if (response is null)
       {
-        throw new InvalidOperationException(
+        throw new EmptyResponseException(
             "Frankfurter returned an empty response.");
       }
 

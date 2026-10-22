@@ -1,4 +1,5 @@
-﻿using ExchangeRate.WebService.Models;
+﻿using ExchangeRate.WebService.Dtos;
+using ExchangeRate.WebService.Models;
 using ExchangeRate.WebService.Options;
 using ExchangeRate.WebService.Providers;
 using Microsoft.Extensions.Options;
@@ -10,12 +11,12 @@ namespace ExchangeRate.WebService.Services
     private readonly IProviderResolver _providerResolver;
     IOptions<ExchangeRatesOptions> _exchangeRateOptions;
 
-    public ExchangeRateService(IProviderResolver providerResolver, IOptions<ExchangeRatesOptions> exchangeRateOptions) 
-    { 
+    public ExchangeRateService(IProviderResolver providerResolver, IOptions<ExchangeRatesOptions> exchangeRateOptions)
+    {
       _providerResolver = providerResolver;
       _exchangeRateOptions = exchangeRateOptions;
     }
-    
+
     public async Task<IReadOnlyList<Currency>> GetCurrenciesAsync(string providerCode, CancellationToken cancellationToken)
     {
       var provider = _providerResolver.Resolve(providerCode);
@@ -35,7 +36,7 @@ namespace ExchangeRate.WebService.Services
       };
 
       return currenciesSorted.ToList();
-  }
+    }
 
     public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string providerCode, string fromCurrency, string toCurrency, DateOnly? from, DateOnly? to, CancellationToken cancellationToken)
     {
@@ -51,7 +52,31 @@ namespace ExchangeRate.WebService.Services
       var provider = _providerResolver.Resolve(providerCode);
       return (await provider.GetRatesAsync(fromCurrency.ToUpper(), toCurrency.ToUpper(), fromNormalized, toNormalized, cancellationToken))
         .OrderBy(x => x.Date).ToList();
-     
+
+    }
+
+    public async Task<ExchangeRateStatistics> GetStatisticsAsync(string providerCode, string fromCurrency, string toCurrency, DateOnly? from, DateOnly? to,
+      CancellationToken cancellationToken)
+    {
+      var rates = await GetRatesAsync(
+          providerCode,
+          fromCurrency,
+          toCurrency,
+          from,
+          to,
+          cancellationToken);
+
+      if (rates.Count == 0)
+      {
+        throw new InvalidOperationException(
+            "No exchange rates available for the selected period.");
+      }
+
+      return new ExchangeRateStatistics(
+          Math.Round(rates.Min(r => r.Value), 4, MidpointRounding.AwayFromZero),
+          Math.Round(rates.Max(r => r.Value), 4, MidpointRounding.AwayFromZero),
+          Math.Round(rates.Average(r => r.Value), 4, MidpointRounding.AwayFromZero),
+          rates.Count);
     }
   }
 }
