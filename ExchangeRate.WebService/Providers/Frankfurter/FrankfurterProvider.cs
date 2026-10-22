@@ -70,7 +70,6 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
               r.BaseCurrency,
               r.TargetCurrency,
               r.Rate))
-          .OrderBy(r => r.Date)
           .ToList();
     }
   }
