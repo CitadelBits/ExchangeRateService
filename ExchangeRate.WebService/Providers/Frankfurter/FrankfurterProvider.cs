@@ -8,10 +8,11 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
   public class FrankfurterProvider : IExchangeRateProvider
   {
     private readonly ProviderOptions _options;
+    private readonly HttpClient _httpClient;
 
     public string Code => Consts.ProviderCodes.Frankfurter;
     public string DisplayName => _options.DisplayName;
-    private readonly HttpClient _httpClient;
+
     public FrankfurterProvider(IOptions<ExchangeRatesOptions> options, IHttpClientFactory httpClientFactory)
     {
       _options = options.Value.Providers
@@ -49,6 +50,12 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
         DateOnly to,
         CancellationToken ct)
     {
+      if (from > to)
+      {
+        throw new ArgumentException(
+            "Start date cannot be later than end date.");
+      }
+
       var url =
           $"v2/rates?base={fromCurrency}" +
           $"&quotes={toCurrency}" +
