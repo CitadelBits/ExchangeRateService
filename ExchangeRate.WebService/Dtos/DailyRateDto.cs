@@ -2,5 +2,7 @@
 {
   public sealed record DailyRateDto(
       DateOnly Date,
-      decimal Rate);
+      decimal Rate,
+      string DisplayDate
+    );
 }

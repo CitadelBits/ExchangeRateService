@@ -4,6 +4,7 @@ using ExchangeRate.WebService.Providers;
 using ExchangeRate.WebService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace CurrencyAggregator.Service.Controllers
 {
@@ -108,8 +109,13 @@ namespace CurrencyAggregator.Service.Controllers
           cancellationToken);
 
       var result = rates
-          .Select(r => new DailyRateDto(r.Date, r.Value))
-          .ToList();
+          .Select(
+          r => new DailyRateDto(
+            r.Date, 
+            r.Value,
+            r.Date.ToString(_options.Value.DateFormat, CultureInfo.InvariantCulture)
+            )
+          ).ToList();
 
       return Ok(result);
     }
