@@ -1,5 +1,6 @@
 ﻿using ExchangeRate.WebService.Models;
 using ExchangeRate.WebService.Options;
+using ExchangeRate.WebService.Providers.Frankfurter.Responses;
 using ExchangeRate.WebService.Providers.Nbp.Responses;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
@@ -40,7 +41,7 @@ namespace ExchangeRate.WebService.Providers.Nbp
           .ToList();
     }
 
-    public Task<IReadOnlyList<DailyRate>> GetRatesAsync(string baseCurrency, string targetCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string fromCurrency, string toCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
     {
       if (from > to)
       {
@@ -48,7 +49,83 @@ namespace ExchangeRate.WebService.Providers.Nbp
             "Start date cannot be later than end date.");
       }
 
-      return Task.FromResult<IReadOnlyList<DailyRate>>(Array.Empty<DailyRate>());
+      var url = _options.Endpoints.Rates
+    .Replace("{fromDate}", from.ToString("yyyy-MM-dd"))
+    .Replace("{toDate}", to.ToString("yyyy-MM-dd"));
+
+      var response = await _httpClient
+    .GetAsync(url, cancellationToken);
+
+      response.EnsureSuccessStatusCode();
+      var responseJson = await response.Content.ReadFromJsonAsync<List<NbpTableResponse>>();
+
+      if (responseJson is null)
+      {
+        throw new InvalidOperationException(
+            "NBP returned an empty response.");
+      }
+
+      var allNbpExchangeRatesDictionary = responseJson.SelectMany
+      (
+        table =>
+        {
+          return table.Rates
+          .Select
+          (rate => new DailyRate(
+            Date: table.EffectiveDate,
+            BaseCurrency: "PLN",
+            TargetCurrency: rate.Code,
+            rate.Mid)
+          );
+        }
+      ).ToDictionary
+      (
+        rate => (rate.Date, rate.TargetCurrency),
+        rate => rate
+      );
+
+      return ConvertRates(allNbpExchangeRatesDictionary, fromCurrency, toCurrency).ToList();
+    }
+
+    private static IEnumerable<DailyRate> ConvertRates(Dictionary<(DateOnly Date, string ToCurrency), DailyRate> plnExchangeRates, string fromCurrency, string toCurrency)
+    {
+      foreach (var date in plnExchangeRates.Keys.Select(x=>x.Date).ToList().Distinct())
+      {
+       
+        if(fromCurrency == "PLN")
+        {
+          yield return new DailyRate(
+            Date: date,
+            BaseCurrency: fromCurrency,
+            TargetCurrency: toCurrency,
+            Value: Math.Round(1m / plnExchangeRates[(date, toCurrency)].Value, 4, MidpointRounding.AwayFromZero)
+          );
+          continue;
+        }
+
+        
+        if (toCurrency == "PLN")
+        {
+          yield return new DailyRate(
+            Date: date,
+            BaseCurrency: fromCurrency,
+            TargetCurrency: toCurrency,
+            Value: plnExchangeRates[(date, fromCurrency)].Value
+          );
+          continue;
+        }
+
+
+        var toCurrencyRateInPlnForGivenDay = plnExchangeRates[(date, toCurrency)].Value;
+        var fromCurrencyRateInPlnForGivenDay = plnExchangeRates[(date, fromCurrency)].Value;
+        yield return new DailyRate(
+          Date: date,
+          BaseCurrency: fromCurrency,
+          TargetCurrency: toCurrency,
+          Value: Math.Round(fromCurrencyRateInPlnForGivenDay / toCurrencyRateInPlnForGivenDay, 4, MidpointRounding.AwayFromZero)
+        );
+      }
+      
     }
   }
 }

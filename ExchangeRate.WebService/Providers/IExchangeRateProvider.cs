@@ -12,8 +12,8 @@ namespace ExchangeRate.WebService.Providers
         CancellationToken cancellationToken);
 
     Task<IReadOnlyList<DailyRate>> GetRatesAsync(
-        string baseCurrency,
-        string targetCurrency,
+        string fromCurrency,
+        string toCurrency,
         DateOnly from,
         DateOnly to,
         CancellationToken cancellationToken);
