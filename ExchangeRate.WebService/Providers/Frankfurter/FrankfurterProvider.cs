@@ -56,11 +56,12 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
             "Start date cannot be later than end date.");
       }
 
-      var url =
-          $"v2/rates?base={fromCurrency}" +
-          $"&quotes={toCurrency}" +
-          $"&from={from:yyyy-MM-dd}" +
-          $"&to={to:yyyy-MM-dd}";
+
+      var url = _options.Endpoints.Rates
+          .Replace("{fromCurrency}", fromCurrency)
+          .Replace("{toCurrency}", toCurrency)
+          .Replace("{fromDate}", from.ToString("yyyy-MM-dd"))
+          .Replace("{toDate}", to.ToString("yyyy-MM-dd"));
 
       var response = await _httpClient
           .GetFromJsonAsync<List<FrankfurterRateResponse>>(url, ct);
