@@ -1,12 +1,8 @@
-
-using ExchangeRate.WebService.Configuration;
 using ExchangeRate.WebService.Consts;
 using ExchangeRate.WebService.Extensions;
 using ExchangeRate.WebService.Options;
-using ExchangeRate.WebService.Providers;
-using ExchangeRate.WebService.Providers.Frankfurter;
-using ExchangeRate.WebService.Providers.Nbp;
-using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Settings.Configuration;
 using System.Reflection;
 
 namespace ExchangeRate.WebService
@@ -36,6 +32,23 @@ namespace ExchangeRate.WebService
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);
       });
+
+      Log.Logger = new LoggerConfiguration()
+          .ReadFrom.Configuration(
+              builder.Configuration,
+              new ConfigurationReaderOptions
+              {
+                SectionName = "Serilog"
+              })
+          .WriteTo.Console()
+          .WriteTo.File(
+              path: builder.Configuration.GetValue<string>("ExchangeRates:LogFilePath")!,
+              rollingInterval: RollingInterval.Day,
+              retainedFileCountLimit: 2)
+          .CreateLogger();
+
+      builder.Services.AddSerilog();
+
 
 
       var app = builder.Build();
