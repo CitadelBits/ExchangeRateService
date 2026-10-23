@@ -1,0 +1,197 @@
+﻿@page "/"
+@attribute [StreamRendering]
+<div>
+  <div class="container-fluid py-4">
+    <div class="container-xxl">
+
+      <!-- Header -->
+      <header class="mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <div class="bg-primary text-white rounded-3 p-3">
+            <i class="bi bi-arrow-left-right fs-3"></i>
+          </div>
+          <div>
+            <h1 class="h3 mb-1">Kursy walut</h1>
+            <p class="text-body-secondary mb-0">
+              Pobieraj i porównuj kursy walut z różnych źródeł
+              oraz analizuj je w wybranym okresie.
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <!-- Query parameters -->
+      <section class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Parametry zapytania</h2>
+
+          <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-6 col-lg-2">
+              <label for="provider" class="form-label">
+                Źródło danych
+              </label>
+              <select id="provider" class="form-select">
+                <option selected disabled>Wybierz źródło</option>
+                <option value="nbp">NBP</option>
+                <option value="frankfurter">Frankfurter</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+              <label for="fromCurrency" class="form-label">
+                Waluta źródłowa
+              </label>
+              <select id="fromCurrency" class="form-select">
+                <option selected disabled>Wybierz walutę</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="PLN">PLN</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+              <label for="toCurrency" class="form-label">
+                Waluta docelowa
+              </label>
+              <select id="toCurrency" class="form-select">
+                <option selected disabled>Wybierz walutę</option>
+                <option value="PLN">PLN</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+              <label for="dateFrom" class="form-label">
+                Okres od
+              </label>
+              <input id="dateFrom" type="date" class="form-control">
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+              <label for="dateTo" class="form-label">
+                Okres do
+              </label>
+              <input id="dateTo" type="date" class="form-control">
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2 d-grid">
+              <button type="button" class="btn btn-primary">
+                <i class="bi bi-search me-2"></i>
+                Pobierz kursy
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Statistics -->
+      <section class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-success-subtle text-success p-3">
+                <i class="bi bi-graph-up-arrow fs-4"></i>
+              </div>
+              <div>
+                <div class="text-body-secondary">Minimum</div>
+                <div class="h4 mb-0">0,0000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-danger-subtle text-danger p-3">
+                <i class="bi bi-graph-down-arrow fs-4"></i>
+              </div>
+              <div>
+                <div class="text-body-secondary">Maksimum</div>
+                <div class="h4 mb-0">0,0000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-primary-subtle text-primary p-3">
+                <i class="bi bi-bar-chart-line fs-4"></i>
+              </div>
+              <div>
+                <div class="text-body-secondary">Średnia</div>
+                <div class="h4 mb-0">0,0000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-info-subtle text-info p-3">
+                <i class="bi bi-list-ol fs-4"></i>
+              </div>
+              <div>
+                <div class="text-body-secondary">Liczba notowań</div>
+                <div class="h4 mb-0">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Courses history -->
+      <section class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between
+                                align-items-center gap-2 mb-3">
+            <h2 class="h5 mb-0">Historia kursów</h2>
+            <span class="text-body-secondary small">
+              Wyniki dla wybranego okresu
+            </span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">Data</th>
+                  <th scope="col">Kurs</th>
+                  <th scope="col">Zmiana</th>
+                  <th scope="col">Zmiana %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="4"
+                      class="text-center text-body-secondary py-5">
+                    <i class="bi bi-currency-exchange fs-2 d-block mb-2"></i>
+                    Brak danych do wyświetlenia
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fotter -->
+      <footer class="text-body-secondary small text-center mt-4">
+        Kursy walut · Dane pochodzą z wybranego dostawcy,
+        np. NBP lub Frankfurter.
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+@code {
+
+}
