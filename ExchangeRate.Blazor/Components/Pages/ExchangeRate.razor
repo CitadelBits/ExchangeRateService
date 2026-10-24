@@ -1,5 +1,22 @@
 ﻿@page "/"
-@attribute [StreamRendering]
+@using global::ExchangeRate.Blazor.WebServiceApi
+@using global::ExchangeRate.Blazor.WebServiceApi.Dtos
+@rendermode InteractiveServer
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>Błąd!</strong> @errorMessage
+
+    <button type="button"
+            class="btn-close"
+            aria-label="Zamknij"
+            @onclick="() => errorMessage = null">
+    </button>
+  </div>
+}
+
+
 <div>
   <div class="container-fluid py-4">
     <div class="container-xxl">
@@ -30,10 +47,22 @@
               <label for="provider" class="form-label">
                 Źródło danych
               </label>
-              <select id="provider" class="form-select">
+              <select id="provider" 
+                      class="form-select"
+                      @bind=selectedProvider
+                      @bind:after=OnProviderChanged>
                 <option selected disabled>Wybierz źródło</option>
-                <option value="nbp">NBP</option>
-                <option value="frankfurter">Frankfurter</option>
+                @{
+                  if (providersDto is not null)
+                  {
+                    foreach(var provider in providersDto.Providers)
+                    {
+                      <option value="@provider.Code">
+                        @provider.Name
+                      </option>
+                    }
+                  }
+                } 
               </select>
             </div>
 
@@ -41,11 +70,19 @@
               <label for="fromCurrency" class="form-label">
                 Waluta źródłowa
               </label>
-              <select id="fromCurrency" class="form-select">
-                <option selected disabled>Wybierz walutę</option>
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
-                <option value="PLN">PLN</option>
+              <select id="fromCurrency" class="form-select" @bind=selectedCurrencyFrom>
+                <option value="" selected disabled>Wybierz walutę</option>
+                @{
+                  if(currencies is not null)
+                  {
+                    foreach (var currency in currencies)
+                    {
+                      <option value="@currency.Code">
+                        @currency.Code
+                      </option>
+                    }
+                  }
+                }
               </select>
             </div>
 
@@ -53,11 +90,19 @@
               <label for="toCurrency" class="form-label">
                 Waluta docelowa
               </label>
-              <select id="toCurrency" class="form-select">
-                <option selected disabled>Wybierz walutę</option>
-                <option value="PLN">PLN</option>
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
+              <select id="toCurrency" class="form-select" @bind=selectedCurrencyTo>
+                <option value="" selected disabled>Wybierz walutę</option>
+                @{
+                  if (currencies is not null)
+                  {
+                    foreach (var currency in currencies)
+                    {
+                      <option value="@currency.Code">
+                        @currency.Code
+                      </option>
+                    }
+                  }
+                }
               </select>
             </div>
 
@@ -65,18 +110,19 @@
               <label for="dateFrom" class="form-label">
                 Okres od
               </label>
-              <input id="dateFrom" type="date" class="form-control">
+              <input id="dateFrom" type="date" class="form-control" @bind=selectedDateFrom>
             </div>
 
             <div class="col-12 col-md-6 col-lg-2">
               <label for="dateTo" class="form-label">
                 Okres do
               </label>
-              <input id="dateTo" type="date" class="form-control">
+              <input id="dateTo" type="date" class="form-control" @bind=selectedDateTo>
             </div>
 
             <div class="col-12 col-md-6 col-lg-2 d-grid">
-              <button type="button" class="btn btn-primary">
+              <button type="button" class="btn btn-primary"
+              onclick="@OnGetCoursesClick">
                 <i class="bi bi-search me-2"></i>
                 Pobierz kursy
               </button>
@@ -95,7 +141,7 @@
               </div>
               <div>
                 <div class="text-body-secondary">Minimum</div>
-                <div class="h4 mb-0">0,0000</div>
+                <div class="h4 mb-0">@(exchangeRateStatisticsDto?.Min.ToString("F4") ?? "0,0000")</div>
               </div>
             </div>
           </div>
@@ -109,7 +155,7 @@
               </div>
               <div>
                 <div class="text-body-secondary">Maksimum</div>
-                <div class="h4 mb-0">0,0000</div>
+                <div class="h4 mb-0">@(exchangeRateStatisticsDto?.Max.ToString("F4") ?? "0,0000")</div>
               </div>
             </div>
           </div>
@@ -123,7 +169,7 @@
               </div>
               <div>
                 <div class="text-body-secondary">Średnia</div>
-                <div class="h4 mb-0">0,0000</div>
+                <div class="h4 mb-0">@(exchangeRateStatisticsDto?.Avg.ToString("F4") ?? "0,0000")</div>
               </div>
             </div>
           </div>
@@ -137,7 +183,7 @@
               </div>
               <div>
                 <div class="text-body-secondary">Liczba notowań</div>
-                <div class="h4 mb-0">0</div>
+                <div class="h4 mb-0">@(exchangeRateStatisticsDto?.Observations.ToString() ?? "0")</div>
               </div>
             </div>
           </div>
@@ -161,8 +207,6 @@
                 <tr>
                   <th scope="col">Data</th>
                   <th scope="col">Kurs</th>
-                  <th scope="col">Zmiana</th>
-                  <th scope="col">Zmiana %</th>
                 </tr>
               </thead>
               <tbody>
@@ -193,5 +237,70 @@
 
 
 @code {
+  ProvidersResponseDto providersDto = null;
+  string selectedProvider = string.Empty;
+  List<CurrencyDto> currencies;
+  string selectedCurrencyFrom = string.Empty;
+  string selectedCurrencyTo = string.Empty;
+  DateOnly? selectedDateFrom;
+  DateOnly? selectedDateTo;
+  ExchangeRateStatisticsDto exchangeRateStatisticsDto;
+  private string? errorMessage;
 
+  private bool isLoading = true;
+  protected override async Task OnInitializedAsync()
+  {
+    try
+    {
+      using var client = new ExchangeRateClient();
+      providersDto = await client.GetProvidersAsync();
+      selectedProvider = providersDto.DefaultProvider;
+      await OnProviderChanged();
+    }
+    finally
+    {
+      isLoading = false;
+    }
+  }
+
+  public async Task OnProviderChanged()
+  {
+    Console.WriteLine($"Selected provider: {selectedProvider}");
+
+    selectedCurrencyFrom = string.Empty;
+    selectedCurrencyTo = string.Empty;
+
+    using var client = new ExchangeRateClient();
+    currencies = await client.GetCurrenciesAsync(selectedProvider);
+  }
+
+  public async Task OnGetCoursesClick()
+  {
+    Console
+    .WriteLine($"GetCourses clicked [Provider: {selectedProvider}], [Currency from: {selectedCurrencyFrom}], " + 
+    $"[Currency to: {selectedCurrencyTo}], [Date from: {selectedDateFrom}], [Date to: {selectedDateTo}]");
+
+    errorMessage = string.Empty;
+
+    try{
+      using var client = new ExchangeRateClient();
+      exchangeRateStatisticsDto =
+        await client.
+        GetStatisticsAsync(
+                selectedProvider, 
+                selectedCurrencyFrom, 
+                selectedCurrencyTo, 
+                selectedDateFrom, 
+                selectedDateTo);
+    }
+    catch(HttpRequestException ex)
+    {
+      errorMessage = ex.Message;
+    }
+    catch (Exception ex)
+    {
+      errorMessage = ex.Message;
+    }
 }
+
+      }

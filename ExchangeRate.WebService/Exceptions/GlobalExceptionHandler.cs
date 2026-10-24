@@ -26,12 +26,17 @@ public sealed class CustomExceptionHandler : IExceptionHandler
 
       EmptyResponseException ex =>
           (StatusCodes.Status204NoContent,
-              "Invalid Arguments",
+              "No Data to Process",
               ex.Message),
 
       ArgumentException ex =>
           (StatusCodes.Status400BadRequest,
               "Invalid Arguments",
+              ex.Message),
+
+      InvalidCastException ex =>
+                (StatusCodes.Status422UnprocessableEntity,
+              "Cannot Proceed",
               ex.Message),
 
       _ =>

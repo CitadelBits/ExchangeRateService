@@ -43,11 +43,7 @@ namespace ExchangeRate.WebService.Services
       var fromNormalized = (from.HasValue ? from.Value : DateOnly.FromDateTime(DateTime.Now));
       var toNormalized = (to.HasValue ? to.Value : DateOnly.FromDateTime(DateTime.Now));
 
-      if (fromNormalized > toNormalized)
-      {
-        throw new ArgumentException(
-            "Start date cannot be later than end date.");
-      }
+      validateParameters(providerCode, fromCurrency, toCurrency, fromNormalized, toNormalized);
 
       var provider = _providerResolver.Resolve(providerCode);
       return (await provider.GetRatesAsync(fromCurrency.ToUpper(), toCurrency.ToUpper(), fromNormalized, toNormalized, cancellationToken))
@@ -77,6 +73,27 @@ namespace ExchangeRate.WebService.Services
           Math.Round(rates.Max(r => r.Value), 4, MidpointRounding.AwayFromZero),
           Math.Round(rates.Average(r => r.Value), 4, MidpointRounding.AwayFromZero),
           rates.Count);
+    }
+  
+    private void validateParameters(string providerCode, string fromCurrency, string toCurrency, DateOnly? from, DateOnly? to)
+    {
+      if (from > to)
+      {
+        throw new ArgumentException(
+            "Start date cannot be later than end date.");
+      }
+
+      if (string.IsNullOrWhiteSpace(fromCurrency) || string.IsNullOrWhiteSpace(toCurrency))
+      {
+        throw new ArgumentException(
+            "From and To currencies must be specified.");
+      }
+
+      if (fromCurrency.Length != 3 || toCurrency.Length !=3)
+      {
+        throw new ArgumentException(
+            "The currency code must be exactly 3 characters long.");
+      }
     }
   }
 }

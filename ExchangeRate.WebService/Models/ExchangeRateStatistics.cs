@@ -3,6 +3,6 @@
   public sealed record ExchangeRateStatistics(
       decimal Min,
       decimal Max,
-      decimal Average,
+      decimal Avg,
       int Observations);
 }
