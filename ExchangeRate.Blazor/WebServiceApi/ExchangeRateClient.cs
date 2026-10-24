@@ -1,7 +1,9 @@
 using ExchangeRate.Blazor.WebServiceApi.Dtos;
+using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ExchangeRate.Blazor.WebServiceApi;
 
@@ -75,33 +77,39 @@ public class ExchangeRateClient : IDisposable
     return await GetFromServiceAsync<ExchangeRateStatisticsDto>(url, cancellationToken);
     }
 
-    private async Task<T> GetFromServiceAsync<T>(
-        string url,
-        CancellationToken cancellationToken)
-    {
-        using var response = await _httpClient.GetAsync(url, cancellationToken);
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+  private async Task<T> GetFromServiceAsync<T>(
+      string url,
+      CancellationToken cancellationToken)
+  {
+    using var response = await _httpClient.GetAsync(url, cancellationToken);
+    var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException(
-                $"API returned {(int)response.StatusCode} ({response.ReasonPhrase}){Environment.NewLine}{body}",
+    if (!response.IsSuccessStatusCode)
+    {
+
+      var details = JsonSerializer.Deserialize<ProblemDetails>(body);
+
+      string detailedMessage = details != null ? $"{details.Title}: {details.Detail}" : body;
+      throw new HttpRequestException(
+                $"API returned {(int)response.StatusCode} ({response.ReasonPhrase}){Environment.NewLine}{detailedMessage}",
                 null,
                 response.StatusCode);
-        }
-
-        if(response.StatusCode == System.Net.HttpStatusCode.NoContent)
-        {
-          throw new HttpRequestException(
-              $"API returned {(int)response.StatusCode} ({response.ReasonPhrase})",
-              null,
-              response.StatusCode);
-        }
-
-        var result = JsonSerializer.Deserialize<T>(body, JsonOptions);
-        return result ?? throw new InvalidOperationException(
-            "API returned an empty or null response.");
     }
+
+
+
+    if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+    {
+      throw new HttpRequestException(
+          $"API returned {(int)response.StatusCode} ({response.ReasonPhrase})",
+          null,
+          response.StatusCode);
+    }
+
+    var result = JsonSerializer.Deserialize<T>(body, JsonOptions);
+    return result ?? throw new InvalidOperationException(
+        "API returned an empty or null response.");
+  }
 
     public void Dispose() => _httpClient.Dispose();
 }
