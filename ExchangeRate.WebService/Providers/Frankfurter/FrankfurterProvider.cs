@@ -11,7 +11,7 @@ namespace ExchangeRate.WebService.Providers.Frankfurter
     private readonly ProviderOptions _options;
     private readonly HttpClient _httpClient;
 
-    public string Code => Consts.ProviderCodes.Frankfurter;
+    public string Code => Consts.ApplicationConstants.Frankfurter;
     public string DisplayName => _options.DisplayName;
 
     public FrankfurterProvider(IOptions<ExchangeRatesOptions> options, IHttpClientFactory httpClientFactory)

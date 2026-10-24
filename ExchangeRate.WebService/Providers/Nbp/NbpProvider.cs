@@ -13,7 +13,7 @@ namespace ExchangeRate.WebService.Providers.Nbp
     private readonly ProviderOptions _options;
     private readonly HttpClient _httpClient;
 
-    public string Code => Consts.ProviderCodes.Nbp;
+    public string Code => Consts.ApplicationConstants.Nbp;
     public string DisplayName => _options.DisplayName;
     public NbpProvider(IOptions<ExchangeRatesOptions> options, IHttpClientFactory httpClientFactory)
     {
@@ -44,7 +44,7 @@ namespace ExchangeRate.WebService.Providers.Nbp
 
     public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string fromCurrency, string toCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
     {
-      var dateRangeChunks = ChunkDateRangeByDays(90, from, to);
+      var dateRangeChunks = ChunkDateRangeByDays(Consts.Common.DaysPerRequest, from, to);
       List<NbpTableResponse> nbpResponses = new();
       foreach (var period in dateRangeChunks)
       {

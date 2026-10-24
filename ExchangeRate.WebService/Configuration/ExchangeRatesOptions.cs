@@ -5,7 +5,7 @@ namespace ExchangeRate.WebService.Options
   public sealed class ExchangeRatesOptions
   {
     public string DateFormat { get; set; } = "yyyy-MM-dd";
-    public string DefaultProvider { get; set; } = ProviderCodes.Nbp;
+    public string DefaultProvider { get; set; } = ApplicationConstants.Nbp;
 
     public CurrencySortOptions CurrencySort { get; set; } = new();
 
