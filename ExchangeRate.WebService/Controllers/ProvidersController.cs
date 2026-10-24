@@ -11,6 +11,7 @@ namespace CurrencyAggregator.Service.Controllers
 {
   [ApiController]
   [Route("api/v1/[controller]")]
+  [ApiConventionType(typeof(DefaultApiConventions))]
   public class ProvidersController : ControllerBase
   {
     private readonly ILogger<ProvidersController> _logger;
@@ -35,7 +36,7 @@ namespace CurrencyAggregator.Service.Controllers
     /// Get all available providers and the default provider.
     /// </summary>
     [HttpGet()]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK), Produces<ProvidersResponseDto>]
     public Task<IActionResult> GetProviders()
     {
       var providers = _providerResolver.GetAll()
@@ -56,8 +57,7 @@ namespace CurrencyAggregator.Service.Controllers
     /// <param name="provider">Provider code, e.g. nbp or frankfurter</param>
     [HttpGet()]
     [Route("{provider}/currencies")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK), Produces<CurrencyDto>]
     public async Task<IActionResult> GetCurrencies(string provider, 
       CancellationToken cancellationToken)
     {
@@ -79,8 +79,8 @@ namespace CurrencyAggregator.Service.Controllers
     /// <param name="query">Exchange rates query parameters</param>
     [HttpGet()]
     [Route("{provider}/rates")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK), Produces<DailyRateDto>]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> GetRates(
         string provider,
         [FromQuery] ExchangeRatesQueryDto query,
@@ -112,6 +112,8 @@ namespace CurrencyAggregator.Service.Controllers
     /// </summary>
     [HttpGet()]
     [Route("{provider}/statistics")]
+    [ProducesResponseType(StatusCodes.Status200OK), Produces<ExchangeRateStatistics>]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<ActionResult<ExchangeRateStatistics>> GetStatistics(
         string provider,
         [FromQuery] ExchangeRatesQueryDto query,
