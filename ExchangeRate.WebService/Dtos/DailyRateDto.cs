@@ -3,6 +3,7 @@
   public sealed record DailyRateDto(
       DateOnly Date,
       decimal Rate,
-      string DisplayDate
+      string DisplayDate,
+      string DisplayRate
     );
 }

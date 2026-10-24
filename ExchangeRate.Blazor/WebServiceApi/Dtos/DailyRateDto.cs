@@ -9,4 +9,5 @@ public sealed class DailyRateDto
   [JsonPropertyName("rate")]
    public decimal Value { get; set; }
     public string DisplayDate { get; set; } = "";
+    public string DisplayRate { get; set; } = "";
 }

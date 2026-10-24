@@ -99,7 +99,8 @@ namespace CurrencyAggregator.Service.Controllers
           r => new DailyRateDto(
             r.Date, 
             r.Value,
-            r.Date.ToString(_options.Value.DateFormat, CultureInfo.InvariantCulture)
+            r.Date.ToString(_options.Value.DateFormat, CultureInfo.InvariantCulture),
+            $"1 {r.BaseCurrency} = {r.Value} {r.TargetCurrency}"
             )
           ).ToList();
 
