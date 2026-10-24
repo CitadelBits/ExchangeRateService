@@ -44,24 +44,31 @@ namespace ExchangeRate.WebService.Providers.Nbp
 
     public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string fromCurrency, string toCurrency, DateOnly from, DateOnly to, CancellationToken cancellationToken)
     {
-    var url = _options.Endpoints.Rates
-    .Replace("{fromDate}", from.ToString("yyyy-MM-dd"))
-    .Replace("{toDate}", to.ToString("yyyy-MM-dd"));
-
-      var response = await _httpClient
-    .GetAsync(url, cancellationToken);
-
-      if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+      var dateRangeChunks = ChunkDateRangeByDays(90, from, to);
+      List<NbpTableResponse> nbpResponses = new();
+      foreach (var period in dateRangeChunks)
       {
-        throw new EmptyResponseException(
-            "NBP returned an empty response.");
+
+        var url = _options.Endpoints.Rates
+        .Replace("{fromDate}", period.From.ToString("yyyy-MM-dd"))
+        .Replace("{toDate}", period.To.ToString("yyyy-MM-dd"));
+
+        var response = await _httpClient
+        .GetAsync(url, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+          throw new EmptyResponseException(
+              "NBP returned an empty response.");
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var responseJson = await response.Content.ReadFromJsonAsync<List<NbpTableResponse>>();
+        nbpResponses.AddRange(responseJson ?? []);
       }
 
-      response.EnsureSuccessStatusCode();
-
-      var responseJson = await response.Content.ReadFromJsonAsync<List<NbpTableResponse>>();
-
-      var allNbpExchangeRatesDictionary = responseJson.SelectMany
+      var allNbpExchangeRatesDictionary = nbpResponses.SelectMany
       (
         table =>
         {
@@ -83,12 +90,40 @@ namespace ExchangeRate.WebService.Providers.Nbp
       return ConvertRates(allNbpExchangeRatesDictionary, fromCurrency, toCurrency).ToList();
     }
 
+    private static List<(DateOnly From, DateOnly To)> ChunkDateRangeByDays(
+        int days,
+        DateOnly from,
+        DateOnly to)
+    {
+      if (days <= 0)
+        throw new ArgumentOutOfRangeException(nameof(days));
+
+      if (from > to)
+        throw new ArgumentException("The start date cannot be later than the end date.");
+
+      var periods = new List<(DateOnly From, DateOnly To)>();
+      var currentFrom = from;
+
+      while (currentFrom <= to)
+      {
+        var currentTo = currentFrom.AddDays(days - 1);
+
+        if (currentTo > to)
+          currentTo = to;
+
+        periods.Add((currentFrom, currentTo));
+        currentFrom = currentTo.AddDays(1);
+      }
+
+      return periods;
+    }
+
     private static IEnumerable<DailyRate> ConvertRates(Dictionary<(DateOnly Date, string ToCurrency), DailyRate> plnExchangeRates, string fromCurrency, string toCurrency)
     {
-      foreach (var date in plnExchangeRates.Keys.Select(x=>x.Date).ToList().Distinct())
+      foreach (var date in plnExchangeRates.Keys.Select(x => x.Date).ToList().Distinct())
       {
-       
-        if(fromCurrency == "PLN")
+
+        if (fromCurrency == "PLN")
         {
           yield return new DailyRate(
             Date: date,
@@ -99,7 +134,7 @@ namespace ExchangeRate.WebService.Providers.Nbp
           continue;
         }
 
-        
+
         if (toCurrency == "PLN")
         {
           yield return new DailyRate(
@@ -121,7 +156,8 @@ namespace ExchangeRate.WebService.Providers.Nbp
           Value: Math.Round(fromCurrencyRateInPlnForGivenDay / toCurrencyRateInPlnForGivenDay, 4, MidpointRounding.AwayFromZero)
         );
       }
-      
+
     }
   }
+
 }
