@@ -42,7 +42,7 @@ namespace ExchangeRate.WebService
               })
           .WriteTo.Console()
           .WriteTo.File(
-              path: builder.Configuration.GetValue<string>("ExchangeRates:LogFilePath")!,
+              path: builder.Configuration.GetValue<string>($"{Consts.ConfigurationSections.ExchangeRates}:LogFilePath")!,
               rollingInterval: RollingInterval.Day,
               retainedFileCountLimit: 2)
           .CreateLogger();
