@@ -38,16 +38,20 @@ public class ExchangeRateClient : IDisposable
         string provider,
         string fromCurrency,
         string toCurrency,
-        DateOnly from,
-        DateOnly to,
+        DateOnly? from,
+        DateOnly? to,
         CancellationToken cancellationToken = default)
     {
-        var url = $"api/v1/providers/{Uri.EscapeDataString(provider)}/rates" +
-                  $"?fromCurrency={Uri.EscapeDataString(fromCurrency)}" +
-                  $"&toCurrency={Uri.EscapeDataString(toCurrency)}" +
-                  $"&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
+    var url = $"api/v1/providers/{Uri.EscapeDataString(provider)}/rates" +
+              $"?fromCurrency={Uri.EscapeDataString(fromCurrency)}" +
+              $"&toCurrency={Uri.EscapeDataString(toCurrency)}";
+    if (from.HasValue)
+      url += $"&from={from.Value:yyyy-MM-dd}";
 
-        return await GetFromServiceAsync<List<DailyRateDto>>(url, cancellationToken);
+    if (to.HasValue)
+      url += $"&to={to.Value:yyyy-MM-dd}";
+
+    return await GetFromServiceAsync<List<DailyRateDto>>(url, cancellationToken);
     }
 
     public async Task<ExchangeRateStatisticsDto> GetStatisticsAsync(
@@ -81,14 +85,17 @@ public class ExchangeRateClient : IDisposable
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
-                $"API returned {(int)response.StatusCode} ({response.ReasonPhrase}).{Environment.NewLine}{body}",
+                $"API returned {(int)response.StatusCode} ({response.ReasonPhrase}){Environment.NewLine}{body}",
                 null,
                 response.StatusCode);
         }
 
         if(response.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-         return default;
+          throw new HttpRequestException(
+              $"API returned {(int)response.StatusCode} ({response.ReasonPhrase})",
+              null,
+              response.StatusCode);
         }
 
         var result = JsonSerializer.Deserialize<T>(body, JsonOptions);

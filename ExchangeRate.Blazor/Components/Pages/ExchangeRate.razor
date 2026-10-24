@@ -1,21 +1,36 @@
 ﻿@page "/"
+@using global::ExchangeRate.Blazor.Models
 @using global::ExchangeRate.Blazor.WebServiceApi
 @using global::ExchangeRate.Blazor.WebServiceApi.Dtos
 @rendermode InteractiveServer
 
-@if (!string.IsNullOrEmpty(errorMessage))
+@if (!string.IsNullOrEmpty(errorMessage) || !string.IsNullOrEmpty(warningMessage))
 {
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <strong>Błąd!</strong> @errorMessage
+  <div class="alert alert-dismissible fade show @(warningMessage is not null ? "alert-warning" : "alert alert-danger")">
+    @{
+      if (warningMessage is not null)
+      {
+        <strong>Ostrzeżenie </strong> @warningMessage
+      }
+
+      if (errorMessage is not null)
+      {
+        <strong>Błąd! </strong> @errorMessage
+      }
+    }
+    
 
     <button type="button"
             class="btn-close"
             aria-label="Zamknij"
-            @onclick="() => errorMessage = null">
+            @onclick="() => {errorMessage = null; warningMessage=null;}">
     </button>
   </div>
 }
 
+<EditForm Model="@filter" OnValidSubmit="OnGetCoursesClick">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
 <div>
   <div class="container-fluid py-4">
@@ -47,9 +62,10 @@
               <label for="provider" class="form-label">
                 Źródło danych
               </label>
+              <span class="text-danger">*</span>
               <select id="provider" 
                       class="form-select"
-                      @bind=selectedProvider
+                      @bind=filter.Provider
                       @bind:after=OnProviderChanged>
                 <option selected disabled>Wybierz źródło</option>
                 @{
@@ -70,7 +86,8 @@
               <label for="fromCurrency" class="form-label">
                 Waluta źródłowa
               </label>
-              <select id="fromCurrency" class="form-select" @bind=selectedCurrencyFrom>
+                <span class="text-danger">*</span>
+              <select id="fromCurrency" class="form-select" @bind=filter.FromCurrency>
                 <option value="" selected disabled>Wybierz walutę</option>
                 @{
                   if(currencies is not null)
@@ -78,7 +95,7 @@
                     foreach (var currency in currencies)
                     {
                       <option value="@currency.Code">
-                        @currency.Code
+                        @currency
                       </option>
                     }
                   }
@@ -90,7 +107,8 @@
               <label for="toCurrency" class="form-label">
                 Waluta docelowa
               </label>
-              <select id="toCurrency" class="form-select" @bind=selectedCurrencyTo>
+                <span class="text-danger">*</span>
+              <select id="toCurrency" class="form-select" @bind=filter.ToCurrency>
                 <option value="" selected disabled>Wybierz walutę</option>
                 @{
                   if (currencies is not null)
@@ -98,7 +116,7 @@
                     foreach (var currency in currencies)
                     {
                       <option value="@currency.Code">
-                        @currency.Code
+                        @currency
                       </option>
                     }
                   }
@@ -110,19 +128,18 @@
               <label for="dateFrom" class="form-label">
                 Okres od
               </label>
-              <input id="dateFrom" type="date" class="form-control" @bind=selectedDateFrom>
+              <input id="dateFrom" type="date" class="form-control" @bind=filter.From>
             </div>
 
             <div class="col-12 col-md-6 col-lg-2">
               <label for="dateTo" class="form-label">
                 Okres do
               </label>
-              <input id="dateTo" type="date" class="form-control" @bind=selectedDateTo>
+              <input id="dateTo" type="date" class="form-control" @bind=filter.To>
             </div>
 
             <div class="col-12 col-md-6 col-lg-2 d-grid">
-              <button type="button" class="btn btn-primary"
-              onclick="@OnGetCoursesClick">
+              <button type="submit" class="btn btn-primary">
                 <i class="bi bi-search me-2"></i>
                 Pobierz kursy
               </button>
@@ -210,20 +227,34 @@
                 </tr>
               </thead>
               <tbody>
+                @if (dailyRates is not null && dailyRates.Count > 0)
+                {
+                  foreach (var rate in dailyRates)
+                  {
+                    <tr>
+                        <td>@rate.DisplayDate</td>
+                      <td>@rate.Value.ToString("F4")</td>
+                    </tr>
+                  }
+                }
+                else
+                {
                 <tr>
                   <td colspan="4"
                       class="text-center text-body-secondary py-5">
                     <i class="bi bi-currency-exchange fs-2 d-block mb-2"></i>
                     Brak danych do wyświetlenia
+                  
                   </td>
                 </tr>
+                }
               </tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- Fotter -->
+      <!-- Footer -->
       <footer class="text-body-secondary small text-center mt-4">
         Kursy walut · Dane pochodzą z wybranego dostawcy,
         np. NBP lub Frankfurter.
@@ -233,19 +264,21 @@
   </div>
 </div>
 
-
+</EditForm>
 
 
 @code {
-  ProvidersResponseDto providersDto = null;
-  string selectedProvider = string.Empty;
-  List<CurrencyDto> currencies;
-  string selectedCurrencyFrom = string.Empty;
-  string selectedCurrencyTo = string.Empty;
-  DateOnly? selectedDateFrom;
-  DateOnly? selectedDateTo;
-  ExchangeRateStatisticsDto exchangeRateStatisticsDto;
+
+  private ExchangeRatesFilter filter = new();
+
+  ProvidersResponseDto? providersDto;
+  ExchangeRateStatisticsDto? exchangeRateStatisticsDtol;
+  List<CurrencyDto> currencies = new();
+  List<DailyRateDto> dailyRates = new();
+  ExchangeRateStatisticsDto? exchangeRateStatisticsDto;
+
   private string? errorMessage;
+  private string? warningMessage;
 
   private bool isLoading = true;
   protected override async Task OnInitializedAsync()
@@ -254,7 +287,7 @@
     {
       using var client = new ExchangeRateClient();
       providersDto = await client.GetProvidersAsync();
-      selectedProvider = providersDto.DefaultProvider;
+      filter.Provider = providersDto.DefaultProvider;
       await OnProviderChanged();
     }
     finally
@@ -265,36 +298,44 @@
 
   public async Task OnProviderChanged()
   {
-    Console.WriteLine($"Selected provider: {selectedProvider}");
-
-    selectedCurrencyFrom = string.Empty;
-    selectedCurrencyTo = string.Empty;
+    filter.FromCurrency = string.Empty;
+    filter.ToCurrency = string.Empty;
 
     using var client = new ExchangeRateClient();
-    currencies = await client.GetCurrenciesAsync(selectedProvider);
+    currencies = await client.GetCurrenciesAsync(filter.Provider);
   }
 
   public async Task OnGetCoursesClick()
   {
-    Console
-    .WriteLine($"GetCourses clicked [Provider: {selectedProvider}], [Currency from: {selectedCurrencyFrom}], " + 
-    $"[Currency to: {selectedCurrencyTo}], [Date from: {selectedDateFrom}], [Date to: {selectedDateTo}]");
-
-    errorMessage = string.Empty;
+    errorMessage = null;
+    warningMessage = null;
 
     try{
       using var client = new ExchangeRateClient();
       exchangeRateStatisticsDto =
         await client.
         GetStatisticsAsync(
-                selectedProvider, 
-                selectedCurrencyFrom, 
-                selectedCurrencyTo, 
-                selectedDateFrom, 
-                selectedDateTo);
+                filter.Provider, 
+                filter.FromCurrency, 
+                filter.ToCurrency, 
+                filter.From, 
+                filter.To);
+
+      dailyRates = await client.GetRatesAsync(
+               filter.Provider, 
+               filter.FromCurrency, 
+               filter.ToCurrency, 
+               filter.From, 
+              filter.To);
     }
     catch(HttpRequestException ex)
     {
+      if(ex.StatusCode == System.Net.HttpStatusCode.NoContent)
+      {
+        warningMessage = "Brak informacji o walutach dla wskazanego okresu.";
+        return;
+      }
+
       errorMessage = ex.Message;
     }
     catch (Exception ex)
