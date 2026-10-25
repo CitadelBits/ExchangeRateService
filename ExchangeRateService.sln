@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.WebService", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.Blazor", "ExchangeRate.Blazor\ExchangeRate.Blazor.csproj", "{ACDDC912-BBDE-484B-8465-3E560F18F05C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.WebService.IntegraionTests", "ExchangeRate.WebService.IntegraionTests\ExchangeRate.WebService.IntegraionTests.csproj", "{40F98E98-8155-42B2-8B57-1BA93CDF9975}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.WebService.IntegrationTests", "ExchangeRate.WebService.IntegraionTests\ExchangeRate.WebService.IntegrationTests.csproj", "{40F98E98-8155-42B2-8B57-1BA93CDF9975}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
