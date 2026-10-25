@@ -31,10 +31,10 @@ namespace ExchangeRate.WebService.Providers.Nbp
           cancellationToken);
 
       var currencies = tables
-          .SelectMany(table => table.Rates)
+          ?.SelectMany(table => table.Rates)
           .Select(rate => new Currency(rate.Code, rate.Currency))
           .DistinctBy(currency => currency.Code)
-          .ToList();
+          .ToList() ?? new();
 
       currencies.Add(new Currency("PLN", "polski złoty"));
 

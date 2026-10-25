@@ -55,6 +55,7 @@ namespace CurrencyAggregator.Service.Controllers
     /// Get currencies from the specified provider.
     /// </summary>
     /// <param name="provider">Provider code, e.g. nbp or frankfurter</param>
+    /// <param name="cancellationToken">To cancel the asynchronous operation</param>
     [HttpGet()]
     [Route("{provider}/currencies")]
     [ProducesResponseType(StatusCodes.Status200OK), Produces<CurrencyDto>]
@@ -77,6 +78,7 @@ namespace CurrencyAggregator.Service.Controllers
     /// </summary>
     /// <param name="provider">Provider code, e.g. nbp or frankfurter</param>
     /// <param name="query">Exchange rates query parameters</param>
+    /// <param name="cancellationToken">To cancel the asynchronous operation</param>
     [HttpGet()]
     [Route("{provider}/rates")]
     [ProducesResponseType(StatusCodes.Status200OK), Produces<DailyRateDto>]
