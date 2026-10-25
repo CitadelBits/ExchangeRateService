@@ -53,14 +53,14 @@ Plik `ExchangeRate.WebService\appsettings.json` umożliwia konfigurację np. spo
 **Uwaga:** Aplikacja kliencka wymaga dostępu do internetu w celu pobrania arkuszy stylów CSS dla biblioteki Bootstrap oraz ikon z serwerów CDN. Wykorzystywane zasoby CDN:
 
 ```html
-<link href="https://jsdelivr.net"
-rel="stylesheet"
-integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous" />
 ```
 
 ```html
-<link rel="stylesheet" href="https://jsdelivr.net" 
-integrity="sha256-ecmcGh4Ok3+AilgWVyi37QCADwLvXvz80Q3+cUZOZ10=" 
-crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" 
+        integrity="sha256-ecmcGh4Ok3+AilgWVyi37QCADwLvXvz80Q3+cUZOZ10=" 
+        crossorigin="anonymous">
 ```
