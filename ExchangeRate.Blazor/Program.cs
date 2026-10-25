@@ -1,4 +1,5 @@
 using ExchangeRate.Blazor.Components;
+using ExchangeRate.Blazor.WebServiceApi;
 
 namespace ExchangeRate.Blazor
 {
@@ -7,6 +8,12 @@ namespace ExchangeRate.Blazor
     public static void Main(string[] args)
     {
       var builder = WebApplication.CreateBuilder(args);
+
+      var config = new ConfigurationBuilder()
+          .AddJsonFile("appsettings.json")
+          .Build();
+
+      ExchangeRateClient.WebServiceUrl = config.GetValue<string>("ExchangeRate:ServiceUrl")!;
 
       // Add services to the container.
       builder.Services.AddRazorComponents()
