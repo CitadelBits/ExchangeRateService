@@ -48,7 +48,7 @@ public class EndpointTests
   [TestCase("nbp", "PLN", "PLN", $"2026-01-01", "2026-01-01", HttpStatusCode.BadRequest)]
   [TestCase("nbp", "EUR", "PLN", "", "2026-01-09", HttpStatusCode.BadRequest)]
   [TestCase("nbp", "EUR", "PLN", "2026-01-05", "", HttpStatusCode.OK)]
-  [TestCase("nbp", "EUR", "PLN", "", "", HttpStatusCode.OK)]
+  [TestCase("nbp", "EUR", "PLN", "", "", HttpStatusCode.NoContent)]
 
   public async Task GetRates_Nbp(
     string provider,
