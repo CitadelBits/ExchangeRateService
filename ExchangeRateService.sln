@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.WebService", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.Blazor", "ExchangeRate.Blazor\ExchangeRate.Blazor.csproj", "{ACDDC912-BBDE-484B-8465-3E560F18F05C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.WebService.IntegrationTests", "ExchangeRate.WebService.IntegraionTests\ExchangeRate.WebService.IntegrationTests.csproj", "{40F98E98-8155-42B2-8B57-1BA93CDF9975}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.WebService.IntegrationTests", "ExchangeRate.WebService.IntegrationTests\ExchangeRate.WebService.IntegrationTests.csproj", "{E2B1E639-9630-B2B2-25BD-3E4987AFA227}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,10 @@ Global
 		{ACDDC912-BBDE-484B-8465-3E560F18F05C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACDDC912-BBDE-484B-8465-3E560F18F05C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACDDC912-BBDE-484B-8465-3E560F18F05C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40F98E98-8155-42B2-8B57-1BA93CDF9975}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40F98E98-8155-42B2-8B57-1BA93CDF9975}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40F98E98-8155-42B2-8B57-1BA93CDF9975}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40F98E98-8155-42B2-8B57-1BA93CDF9975}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2B1E639-9630-B2B2-25BD-3E4987AFA227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2B1E639-9630-B2B2-25BD-3E4987AFA227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2B1E639-9630-B2B2-25BD-3E4987AFA227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2B1E639-9630-B2B2-25BD-3E4987AFA227}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
