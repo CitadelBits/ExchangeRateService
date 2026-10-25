@@ -279,7 +279,6 @@
   private string? errorMessage;
   private string? warningMessage;
 
-  private bool isLoading = true;
   protected override async Task OnInitializedAsync()
   {
     try
@@ -289,9 +288,9 @@
       filter.Provider = providersDto.DefaultProvider;
       await OnProviderChanged();
     }
-    finally
+    catch (Exception ex)
     {
-      isLoading = false;
+      errorMessage = ex.Message;
     }
   }
 

@@ -9,10 +9,10 @@ namespace ExchangeRate.Blazor.WebServiceApi;
 
 public class ExchangeRateClient : IDisposable
 {
-  public static string WebServiceUrl { get; set; }
+  public static string WebServiceUrl { get; set; } = "https://localhost:7064/";
 
-    // Zmień port na adres HTTPS/HTTP uruchomionego backendu.
-    private readonly HttpClient _httpClient = new()
+  // Zmień port na adres HTTPS/HTTP uruchomionego backendu.
+  private readonly HttpClient _httpClient = new()
     {
       BaseAddress = new Uri(WebServiceUrl)
     };
