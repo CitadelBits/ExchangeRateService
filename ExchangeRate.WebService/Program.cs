@@ -24,7 +24,9 @@ namespace ExchangeRate.WebService
       builder.Services.AddProblemDetails();
       builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
-      builder.Services.AddControllers();
+      builder.Services.AddControllers()
+        .AddControllersAsServices();
+
       builder.Services.AddEndpointsApiExplorer();
       builder.Services.AddSwaggerGen(c =>
       {

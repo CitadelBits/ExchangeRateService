@@ -40,8 +40,15 @@ namespace ExchangeRate.WebService.Services
 
     public async Task<IReadOnlyList<DailyRate>> GetRatesAsync(string providerCode, string fromCurrency, string toCurrency, DateOnly? from, DateOnly? to, CancellationToken cancellationToken)
     {
-      var fromNormalized = (from.HasValue ? from.Value : DateOnly.FromDateTime(DateTime.Now));
-      var toNormalized = (to.HasValue ? to.Value : DateOnly.FromDateTime(DateTime.Now));
+      var today = DateOnly.FromDateTime(DateTime.Now);
+
+      var fromNormalized = from.HasValue
+          ? from.Value
+          : today;
+
+      var toNormalized = to.HasValue
+          ? to.Value
+          : today;
 
       validateParameters(providerCode, fromCurrency, toCurrency, fromNormalized, toNormalized);
 
@@ -74,7 +81,7 @@ namespace ExchangeRate.WebService.Services
           Math.Round(rates.Average(r => r.Value), 4, MidpointRounding.AwayFromZero),
           rates.Count);
     }
-  
+
     private void validateParameters(string providerCode, string fromCurrency, string toCurrency, DateOnly? from, DateOnly? to)
     {
       if (from > to)
@@ -89,10 +96,22 @@ namespace ExchangeRate.WebService.Services
             "From and To currencies must be specified.");
       }
 
-      if (fromCurrency.Length != 3 || toCurrency.Length !=3)
+      if (fromCurrency.Length != 3 || toCurrency.Length != 3)
       {
         throw new ArgumentException(
             "The currency code must be exactly 3 characters long.");
+      }
+
+      if (fromCurrency.Equals(toCurrency, StringComparison.OrdinalIgnoreCase))
+      {
+        throw new ArgumentException(
+            "From and To currencies cannot be the same.");
+      }
+
+      if (string.IsNullOrWhiteSpace(providerCode))
+      {
+        throw new ArgumentException(
+            "Provider code must be specified.");
       }
     }
   }

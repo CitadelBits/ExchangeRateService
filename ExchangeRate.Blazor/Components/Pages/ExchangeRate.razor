@@ -272,7 +272,6 @@
   private ExchangeRatesFilter filter = new();
 
   ProvidersResponseDto? providersDto;
-  ExchangeRateStatisticsDto? exchangeRateStatisticsDtol;
   List<CurrencyDto> currencies = new();
   List<DailyRateDto> dailyRates = new();
   ExchangeRateStatisticsDto? exchangeRateStatisticsDto;
@@ -300,6 +299,8 @@
   {
     filter.FromCurrency = string.Empty;
     filter.ToCurrency = string.Empty;
+    dailyRates.Clear();
+    exchangeRateStatisticsDto = new ExchangeRateStatisticsDto();
 
     using var client = new ExchangeRateClient();
     currencies = await client.GetCurrenciesAsync(filter.Provider);
@@ -309,6 +310,8 @@
   {
     errorMessage = null;
     warningMessage = null;
+    dailyRates.Clear();
+    exchangeRateStatisticsDto = new ExchangeRateStatisticsDto();
 
     try{
       using var client = new ExchangeRateClient();

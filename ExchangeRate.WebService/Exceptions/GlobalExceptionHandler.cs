@@ -29,17 +29,27 @@ public sealed class CustomExceptionHandler : IExceptionHandler
               "No Data to Process",
               ex.Message),
 
+      UnrecognizedCurrency ex =>
+          (StatusCodes.Status400BadRequest,
+              "Urecognized currency",
+              ex.Message),
+
       ArgumentException ex =>
           (StatusCodes.Status400BadRequest,
               "Invalid Arguments",
               ex.Message),
 
-      InvalidCastException ex =>
+      InvalidOperationException ex =>
                 (StatusCodes.Status422UnprocessableEntity,
               "Cannot Proceed",
               ex.Message),
 
-      _ =>
+      HttpRequestException ex =>
+          (StatusCodes.Status400BadRequest,
+              "General Request Error",
+              ex.Message),
+
+     _ =>
           (StatusCodes.Status500InternalServerError,
               "Internal Server Error",
               "An unexpected server error occurred.")

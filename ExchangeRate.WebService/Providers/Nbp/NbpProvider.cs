@@ -50,8 +50,8 @@ namespace ExchangeRate.WebService.Providers.Nbp
       {
 
         var url = _options.Endpoints.Rates
-        .Replace("{fromDate}", period.From.ToString("yyyy-MM-dd"))
-        .Replace("{toDate}", period.To.ToString("yyyy-MM-dd"));
+            .Replace("{fromDate}", period.From.ToString("yyyy-MM-dd"))
+            .Replace("{toDate}", period.To.ToString("yyyy-MM-dd"));
 
         var response = await _httpClient
         .GetAsync(url, cancellationToken);
@@ -60,6 +60,12 @@ namespace ExchangeRate.WebService.Providers.Nbp
         {
           throw new EmptyResponseException(
               "NBP returned an empty response.");
+        }
+
+        if(!response.IsSuccessStatusCode)
+        {
+          throw new HttpRequestException(
+              $"NBP returned an error response: {response.StatusCode} - {response.ReasonPhrase}");
         }
 
         response.EnsureSuccessStatusCode();
@@ -87,6 +93,18 @@ namespace ExchangeRate.WebService.Providers.Nbp
         rate => rate
       );
 
+      var supportedCurrencies = allNbpExchangeRatesDictionary.Keys.Select(x => x.TargetCurrency).ToList()
+        .Distinct()
+        .ToList();
+
+      supportedCurrencies.Add("PLN");
+
+      if (!supportedCurrencies.Contains(fromCurrency))
+        throw new UnrecognizedCurrency($"Unrecognized source currency '{fromCurrency}'");
+
+      if (!supportedCurrencies.Contains(toCurrency))
+        throw new UnrecognizedCurrency($"Unrecognized target currency '{toCurrency}'");
+
       return ConvertRates(allNbpExchangeRatesDictionary, fromCurrency, toCurrency).ToList();
     }
 
@@ -96,10 +114,20 @@ namespace ExchangeRate.WebService.Providers.Nbp
         DateOnly to)
     {
       if (days <= 0)
-        throw new ArgumentOutOfRangeException(nameof(days));
+        throw new ArgumentOutOfRangeException(
+            nameof(days), days, "Number of days must be greater than zero.");
 
       if (from > to)
-        throw new ArgumentException("The start date cannot be later than the end date.");
+        throw new ArgumentException(
+            "The start date cannot be later than the end date.");
+
+      var today = DateOnly.FromDateTime(DateTime.Today);
+
+      if (from > today)
+        from = today;
+
+      if (to > today)
+        to = today;
 
       var periods = new List<(DateOnly From, DateOnly To)>();
       var currentFrom = from;
