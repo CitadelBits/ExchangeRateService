@@ -44,7 +44,7 @@ bash
 dotnet run -c Debug --project ExchangeRate.Blazor\ExchangeRate.Blazor.csproj --urls  https://localhost:7286
 ```
 
-alternatywnie można uruchomić testy integracyjne poprzez wykonanie polecenia (wymagany dostęp do internetu)
+opcjonalnie można uruchomić testy integracyjne poprzez wykonanie polecenia (wymagany dostęp do internetu)
 
 bash
 
